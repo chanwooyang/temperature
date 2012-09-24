@@ -67,17 +67,17 @@ public class Temperature implements Comparable<Temperature> {
 		}
 		else if (this.units == Temperature.Units.KELVIN){
 			this.units = Temperature.Units.FAHRENHEIT;
-			this.value = (temp - 273.15) * 9 / 5 +32;
+			this.value = (-273.15 + temp) * 9 / 5 + 32;
 		}
 	}	
 	else if (units == Temperature.Units.KELVIN){
 		if (this.units == Temperature.Units.CELCIUS){
 			this.units = Temperature.Units.KELVIN;
-			this.value = temp +273.15;
+			this.value = temp + 273.15;
 		}
 		else if (this.units == Temperature.Units.FAHRENHEIT){
 			this.units = Temperature.Units.KELVIN;
-			this.value = (temp - 32) * 5 / 9 + 273.15;
+			this.value = (-32 + temp) * 5 / 9 + 273.15;
 		}
 	}
 	else {
@@ -87,7 +87,7 @@ public class Temperature implements Comparable<Temperature> {
 		}
 		else if (this.units == Temperature.Units.FAHRENHEIT){
 			this.units = Temperature.Units.CELCIUS;
-			this.value = (temp - 32) * 5 / 9;
+			this.value = (-32 + temp) * 5 / 9;
 		}
 	}
 }
@@ -179,12 +179,46 @@ public class Temperature implements Comparable<Temperature> {
   public boolean equals (Object o) {
     // ...
 	boolean eq = true;
+	double temporary = 0;		// declare a temporary variable to store the converted value, so that unit conversion process does not affect the return value of getValue() function
 	
 	if (this == o){
 		eq = true;
 	}
 	if ((o == null) || (o.getClass() != this.getClass())){
 		eq = false;
+	}
+	
+//Below is the modification after the Unit Test	------------------------------------------------------
+// changeUnits() function is not used.
+	
+	final Temperature other = (Temperature) o;
+	if (this.units == other.units){				//if two objects' units are the same, 
+		if (this.value != other.value){			//only compare the value
+			eq = false;
+		}
+	}
+	if (this.units != other.units){			//if units of two objects are different, do the unit conversion at each different cases of object's unit.
+		if ((this.units == Temperature.Units.CELCIUS)&&(other.units == Temperature.Units.KELVIN)){
+			temporary = this.value + 273.15; 		//store the converted value of temperature in temporary variable, so that unit conversion does not change the return value of getValue() function
+		}
+		else if ((this.units == Temperature.Units.CELCIUS)&&(other.units == Temperature.Units.FAHRENHEIT)){
+			temporary = this.value * 9 / 5 + 32;
+		}
+		else if ((this.units == Temperature.Units.KELVIN)&&(other.units == Temperature.Units.CELCIUS)){
+			temporary = this.value - 273.15;
+		}
+		else if ((this.units == Temperature.Units.KELVIN)&&(other.units == Temperature.Units.FAHRENHEIT)){
+			temporary = (this.value - 273.15) * 9 / 5 + 32;
+		}
+		else if ((this.units == Temperature.Units.FAHRENHEIT)&&(other.units == Temperature.Units.KELVIN)){
+			temporary = (this.value - 32) * 5 / 9 + 273.15;
+		}
+		else if ((this.units == Temperature.Units.FAHRENHEIT)&&(other.units == Temperature.Units.CELCIUS)){
+			temporary = (this.value - 32) * 5 / 9;
+		}
+		if (temporary != other.value){
+			eq = false;		// compare the converted value in temporary variable with the the other object value
+		}
 	}
 	return eq;
   }
